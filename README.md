@@ -29,10 +29,23 @@ El servicio sigue marcado como compatible con Direct Boot para poder diagnostica
 - El estado del interruptor y los registros están en SharedPreferences; para una versión posterior con búsquedas, exportaciones y grandes volúmenes de historial se recomienda Room.
 - Antes del primer desbloqueo no se bloquea ninguna llamada: es una limitación de seguridad necesaria para no rechazar contactos legítimos.
 
+## Compilar e instalar la versión final
+
+La versión 2.1 usa el identificador definitivo `com.nordcallblocker.app`. Para generar el APK firmado:
+
+```bash
+./gradlew assembleRelease
+adb install app/build/outputs/apk/release/app-release.apk
+```
+
+Las futuras actualizaciones del mismo paquete pueden instalarse con `adb install -r`. Si aún está instalada una compilación antigua con el identificador `com.example.nordcallblocker`, Android conservará ambas aplicaciones: configura el rol y los permisos en la nueva y elimina la anterior solo después de comprobar que todo funciona. El historial antiguo no se migra entre identificadores.
+
+La firma de actualización se guarda localmente en `keystore/nordcallblocker-release.jks` y su configuración en `keystore.properties`. Ambos están excluidos de Git y deben respaldarse juntos en un lugar seguro. Sin esa clave no será posible publicar actualizaciones sobre la misma instalación. `keystore.properties.example` documenta el formato sin incluir secretos.
+
 ## Prueba de Direct Boot
 
-1. Instala la versión 1.6, ábrela con el teléfono desbloqueado, pulsa **Configurar protección**, acepta ambos diálogos y deja activado el interruptor.
-2. Ejecuta `adb logcat -c` y después `adb logcat -s NordCallBlocker:I`.
+1. Instala la versión 2.1, ábrela con el teléfono desbloqueado, pulsa **Configurar protección**, acepta ambos diálogos y deja activado el interruptor.
+2. Instala una compilación debug para diagnóstico. Los mensajes internos se omiten deliberadamente en la versión release.
 3. Reinicia el teléfono y, sin desbloquear, llama desde un número no guardado y un contacto: ambos deben permitirse.
 4. Desbloquea sin abrir la app y repite: el desconocido debe bloquearse y el contacto debe permitirse.
 5. Abre la app y repite una tercera vez. Los mensajes indican `userUnlocked`, `roleHeld`, permiso y motivo de decisión, pero nunca incluyen el número.
@@ -44,7 +57,7 @@ La consulta de contactos tiene un límite interno de dos segundos para respetar 
 - `BlockerService.kt`: decisión y rechazo de llamada.
 - `ContactLookup.kt`: consulta acotada y segura del número en contactos.
 - `BlockerStore.kt`: interruptor e historial local.
-- `MainActivity.kt`: interfaz y solicitud de rol del sistema.
+- `MainActivity.kt`: interfaz, recuperación de permisos, accesibilidad y menú lateral de información.
 - `AndroidManifest.xml`: servicio protegido mediante BIND_SCREENING_SERVICE.
 
 ## Referencias

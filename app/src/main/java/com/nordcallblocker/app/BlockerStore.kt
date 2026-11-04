@@ -1,14 +1,12 @@
-package com.example.nordcallblocker
+package com.nordcallblocker.app
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.UserManager
-import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 
 internal object BlockerStore {
-    private const val TAG = "NordCallBlocker"
     private const val PREFS = "blocker_settings"
     private const val KEY_ENABLED = "enabled"
     private const val HISTORY = "blocked_history"
@@ -43,7 +41,7 @@ internal object BlockerStore {
             // Keep the history in CE; remove only the setting that has moved to DE.
             credentialPrefs.edit().remove(KEY_ENABLED).apply()
         } else {
-            Log.w(TAG, "Unable to initialize device-protected blocker setting")
+            AppLog.w(context, "Unable to initialize device-protected blocker setting")
         }
         return migratedValue
     }
@@ -51,7 +49,7 @@ internal object BlockerStore {
     @Synchronized
     fun setEnabled(context: Context, enabled: Boolean): Boolean {
         val saved = devicePreferences(context).edit().putBoolean(KEY_ENABLED, enabled).commit()
-        if (!saved) Log.w(TAG, "Unable to persist device-protected blocker setting")
+        if (!saved) AppLog.w(context, "Unable to persist device-protected blocker setting")
         return saved
     }
 

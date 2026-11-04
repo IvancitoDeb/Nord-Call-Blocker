@@ -1,8 +1,8 @@
 # context.md — Nord Call Blocker
 
-**Última actualización:** 2026-10-30  
+**Última actualización:** 2026-11-04  
 **Destino:** continuar el desarrollo desde Visual Studio Code (VS Code)  
-**Estado:** versión 1.6 con verificación explícita de contactos, interfaz renovada, logo personalizado e insets para barras del sistema. Corrige un cierre de 1.5 en OxygenOS al acceder al controlador de insets antes de crear `DecorView`; pendiente de validación física.  
+**Estado:** versión 2.1 con pantalla principal simplificada, menú informativo deslizable desde la izquierda y más espacio vertical para el historial. Conserva conteos diarios, confirmación antes del borrado, recuperación de permisos, identidad definitiva, APK release firmado y logs desactivados en producción. El usuario confirmó que el filtrado funcionó correctamente durante varios días antes de estos cambios finales de interfaz y entrega.  
 **Dispositivo:** OnePlus Nord 3 · Android 16 · OxygenOS.  
 **Proyecto base:** `NordCallBlocker_Android16.zip` (carpeta raíz `NordCallBlocker/`).
 
@@ -23,6 +23,7 @@ Aplicación Android personal que rechaza automáticamente llamadas telefónicas 
 | Reiniciar y recibir llamada **antes del primer desbloqueo** | **1 llamada entró** | Bloqueo no fue efectivo en ese estado |
 | Desbloquear, abrir la app y repetir llamadas | Volvieron a bloquearse | Recuperación observada después de ambos pasos, sin poder aislar cuál fue determinante |
 | Versión 1.1 con Direct Boot, contactos y desconocidos | **Todos fueron bloqueados antes y después del primer desbloqueo** | El dispositivo entrega también llamadas de contactos al servicio; bloquear cada callback no es seguro |
+| Uso continuado de la versión 1.6 | **Funcionó correctamente durante varios días** | El flujo principal de filtrado quedó estable según la experiencia reportada por el usuario |
 
 **Todavía sin probar/confirmar:** que baste con *desbloquear sin abrir* la app; si el servicio recibe `onScreenCall` en Direct Boot; si se mantiene seleccionado el rol de filtrado tras reiniciar; funcionalidad con pantalla apagada después de haber desbloqueado una vez; estado del interruptor justo tras el arranque; bloqueos anónimos; comportamiento de ON/OFF y persistencia después de otros reinicios. No inventar recuentos adicionales.
 
@@ -32,7 +33,7 @@ La llamada que entró ocurrió **antes del primer desbloqueo después de reinici
 
 **Riesgo de falso positivo:** no se debe forzar el rechazo de toda llamada antes del desbloqueo sin asegurar que Android sigue diferenciando contactos guardados; podría bloquear familiares, servicios urgentes u otras llamadas legítimas.
 
-### Corrección de seguridad implementada en 1.2 (todavía NO validada en dispositivo)
+### Corrección de seguridad implementada desde 1.2
 
 1. Se declara y solicita `READ_CONTACTS`. Después del desbloqueo, cada número se consulta localmente mediante `ContactsContract.PhoneLookup`.
 2. Solo se bloquea si el interruptor está activo, el permiso está concedido y la consulta confirma `NOT_SAVED`.
@@ -42,20 +43,23 @@ La llamada que entró ocurrió **antes del primer desbloqueo después de reinici
 5. Verificar si `onScreenCall` se ejecuta **antes** del primer desbloqueo. Si no se ejecuta, no puede resolverse únicamente leyendo preferencias desde DE; investigar el rol/Telecom/OxygenOS y sus limitaciones. No implementar un servicio permanente ni un `BOOT_COMPLETED` receiver sin evidencia de necesidad.
 6. Repetir pruebas con un número guardado y uno no guardado **antes del primer desbloqueo**, y después del primero, con registros de Logcat y estado del rol. Si no hay filtrado posible antes del desbloqueo, documentar la limitación con precisión.
 
-## 4. Arquitectura del ZIP original (inspeccionada)
+## 4. Arquitectura actual
 
 | Archivo | Contenido |
 |---|---|
-| `app/src/main/java/com/example/nordcallblocker/BlockerService.kt` | `CallScreeningService`; para llamadas entrantes consulta `BlockerStore.enabled()`, genera `CallResponse` con `setDisallowCall(block)` y `setRejectCall(block)`, responde rápidamente, y en caso de bloqueo abre un `Thread` para guardar el evento |
-| `app/src/main/java/com/example/nordcallblocker/BlockerStore.kt` | `SharedPreferences` llamado `blocker_settings`, clave `enabled` (por defecto `true`), `blocked_history` como JSON (número, timestamp) limitado a 200 entradas |
-| `app/src/main/java/com/example/nordcallblocker/ContactLookup.kt` | Consulta `PhoneLookup` con timeout de dos segundos y resultado seguro `UNKNOWN` ante errores |
-| `app/src/main/java/com/example/nordcallblocker/MainActivity.kt` | UI Android nativa con tarjetas; un solo botón encadena `ROLE_CALL_SCREENING` y `READ_CONTACTS`, además del interruptor e historial |
+| `app/src/main/java/com/nordcallblocker/app/BlockerService.kt` | `CallScreeningService`; consulta estado, desbloqueo, permiso y contactos antes de decidir; responde permitiendo ante cualquier incertidumbre |
+| `app/src/main/java/com/nordcallblocker/app/BlockerStore.kt` | Preferencias DE para el interruptor e historial CE privado en JSON, limitado a 200 entradas |
+| `app/src/main/java/com/nordcallblocker/app/ContactLookup.kt` | Consulta `PhoneLookup` con timeout de dos segundos y resultado seguro `UNKNOWN` ante errores |
+| `app/src/main/java/com/nordcallblocker/app/MainActivity.kt` | UI Android nativa; botón único para rol y contactos, recuperación desde Ajustes, historial diario y menú lateral con Privacidad y Acerca de |
+| `app/src/main/java/com/nordcallblocker/app/AppLog.kt` | Diagnósticos disponibles únicamente en compilaciones depurables; nunca registra números |
 | `app/src/main/AndroidManifest.xml` | Activity, servicio con `BIND_SCREENING_SERVICE`, `exported=true`, intent `android.telecom.CallScreeningService`; **no tiene** `directBootAware` en el ZIP |
-| `app/build.gradle.kts` | `compileSdk=37`, `targetSdk=36`, `minSdk=29`, Java/Kotlin 17, `versionCode=7`, `versionName=1.6` |
+| `app/build.gradle.kts` | `compileSdk=37`, `targetSdk=36`, `minSdk=29`, Java/Kotlin 17, `versionCode=11`, `versionName=2.1`; release con R8, reducción de recursos y firma local |
 | `README.md` | Instrucciones originales |
 | `gradle/wrapper/gradle-wrapper.properties` | Configuración de distribución de Gradle |
 
-**Identificador:** `com.example.nordcallblocker`. La copia actual incluye Gradle Wrapper 9.6.0 y la versión 1.6 compila mediante `./gradlew assembleDebug`. La compilación local no sustituye la prueba física del filtrado ni la revisión visual en distintas escalas de pantalla.
+**Identificador definitivo:** `com.nordcallblocker.app`. La copia actual incluye Gradle Wrapper 9.6.0. La versión 2.1 se verificó localmente con `assembleDebug`, `assembleRelease` y `lintRelease`; el APK release tiene firma v2 válida. La compilación local no sustituye la revisión visual y funcional en el dispositivo.
+
+El cambio desde `com.example.nordcallblocker` hace que Android trate la rama 2.x como una aplicación distinta. No hay migración automática del historial ni de los permisos de la instalación antigua. La clave y `keystore.properties` están ignorados por Git y deben respaldarse de forma privada para conservar la capacidad de actualización.
 
 **Decisión de permisos revisada:** la prueba de 1.1 demostró que en este dispositivo no es seguro depender de que Telecom excluya contactos. La versión 1.2 solicita `READ_CONTACTS`, hace una consulta local y falla permitiendo la llamada ante cualquier incertidumbre. No hay uso de Compose ni Room.
 
@@ -64,7 +68,7 @@ La llamada que entró ocurrió **antes del primer desbloqueo después de reinici
 - **Persistencia del historial:** en 1.1 primero se responde a Telecom y después se guarda de forma síncrona con `commit()`, antes de devolver el callback. El historial continúa limitado a 200 entradas.
 - **Concurrencia:** en 1.1, lectura, adición y borrado del historial comparten sincronización.
 - **Privacidad:** números y marcas temporales son información sensible para el usuario; no transferirlos ni escribirlos íntegros a logs. `allowBackup=false` en el manifiesto original.
-- **Interfaz:** la versión 1.3 incorpora jerarquía visual, tarjetas, estados por color, historial rediseñado, icono y flujo unificado de permisos, todavía sin depender de Material 3.
+- **Interfaz:** la versión 2.1 agrupa el historial por fecha local, muestra conteo diario y alterna colores entre días. Privacidad y Acerca de están en un panel lateral accesible por botón, gesto desde el borde y navegación Atrás.
 - **Excepciones/whitelist:** todavía no implementadas.
 - **Llamadas ocultas/privadas:** pueden no enviarse a este servicio; el bloqueo de números ocultos debe tratarse por separado en ajustes del teléfono/OxygenOS.
 - **El rol puede reemplazar** un filtro de spam/identificador de llamadas previamente seleccionado.

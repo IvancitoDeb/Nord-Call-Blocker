@@ -1,16 +1,15 @@
-package com.example.nordcallblocker
+package com.nordcallblocker.app
 
 import android.Manifest
 import android.app.role.RoleManager
 import android.content.pm.PackageManager
 import android.telecom.Call
 import android.telecom.CallScreeningService
-import android.util.Log
 
 class BlockerService : CallScreeningService() {
     override fun onScreenCall(callDetails: Call.Details) {
         if (callDetails.callDirection != Call.Details.DIRECTION_INCOMING) {
-            Log.d(TAG, "Ignoring non-incoming screening callback")
+            AppLog.d(this, "Ignoring non-incoming screening callback")
             return
         }
 
@@ -38,8 +37,8 @@ class BlockerService : CallScreeningService() {
         }
 
         // Deliberately omit the phone number and Call.Details from diagnostics.
-        Log.i(
-            TAG,
+        AppLog.i(
+            this,
             "Screening callback: userUnlocked=$userUnlocked roleHeld=$roleHeld " +
                 "settingInitialized=$settingInitialized enabled=$enabled " +
                 "contactsPermission=$contactsPermission decision=$reason"
@@ -53,16 +52,13 @@ class BlockerService : CallScreeningService() {
             .build()
         // Respond first: Android allows a maximum of five seconds.
         respondToCall(callDetails, response)
-        Log.i(TAG, "Screening response sent: blocked=$block")
+        AppLog.i(this, "Screening response sent: blocked=$block")
 
         if (block && number != null) {
             if (!BlockerStore.append(applicationContext, number)) {
-                Log.w(TAG, "Unable to persist blocked-call history entry")
+                AppLog.w(this, "Unable to persist blocked-call history entry")
             }
         }
     }
 
-    private companion object {
-        const val TAG = "NordCallBlocker"
-    }
 }

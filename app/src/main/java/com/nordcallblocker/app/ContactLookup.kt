@@ -1,15 +1,13 @@
-package com.example.nordcallblocker
+package com.nordcallblocker.app
 
 import android.content.Context
 import android.os.CancellationSignal
 import android.provider.ContactsContract
-import android.util.Log
 import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 internal object ContactLookup {
-    private const val TAG = "NordCallBlocker"
     private const val TIMEOUT_MILLIS = 2_000L
 
     enum class Result {
@@ -34,12 +32,12 @@ internal object ContactLookup {
         } catch (_: TimeoutException) {
             cancellationSignal.cancel()
             lookup.cancel(true)
-            Log.w(TAG, "Contact lookup timed out; allowing call")
+            AppLog.w(context, "Contact lookup timed out; allowing call")
             Result.UNKNOWN
         } catch (error: Exception) {
             cancellationSignal.cancel()
             lookup.cancel(true)
-            Log.w(TAG, "Contact lookup failed (${error.javaClass.simpleName}); allowing call")
+            AppLog.w(context, "Contact lookup failed (${error.javaClass.simpleName}); allowing call")
             Result.UNKNOWN
         }
     }
@@ -68,7 +66,7 @@ internal object ContactLookup {
                 if (it.moveToFirst()) Result.SAVED else Result.NOT_SAVED
             }
         } catch (error: Exception) {
-            Log.w(TAG, "Contact provider error (${error.javaClass.simpleName}); allowing call")
+            AppLog.w(context, "Contact provider error (${error.javaClass.simpleName}); allowing call")
             Result.UNKNOWN
         }
     }

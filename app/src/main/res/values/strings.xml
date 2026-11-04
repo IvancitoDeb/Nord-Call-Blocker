@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nord Call Blocker</string>
+    <string name="header_subtitle">Tus llamadas, bajo control</string>
+    <string name="configure_protection">Configurar protección</string>
+    <string name="complete_contacts_access">Completar acceso a contactos</string>
+    <string name="permissions_configured">Permisos configurados</string>
+    <string name="privacy_title">Privacidad primero</string>
+    <string name="privacy_description">Los contactos se consultan únicamente en este teléfono. Antes del primer desbloqueo se permiten todas las llamadas para no bloquear personas guardadas.</string>
+    <string name="block_unknown_numbers">Bloquear números no guardados</string>
+    <string name="protection_description">Los contactos guardados y las decisiones inciertas siempre se permiten.</string>
+    <string name="history_title">Historial de bloqueos</string>
+    <string name="refresh">Actualizar</string>
+    <string name="delete">Borrar</string>
+    <string name="about">Acerca de</string>
+    <string name="information">Información</string>
+    <string name="open_menu">Abrir menú de información</string>
+    <string name="close_menu">Cerrar menú de información</string>
+    <string name="menu_symbol" translatable="false">☰</string>
+    <string name="close_symbol" translatable="false">×</string>
+
+    <string name="status_role_unavailable">No disponible · el sistema no ofrece filtrado de llamadas</string>
+    <string name="status_role_missing">Configuración pendiente · falta acceso de filtrado</string>
+    <string name="status_contacts_missing">Protección pausada · falta acceso a contactos</string>
+    <string name="status_active">Protección activa · contactos permitidos</string>
+    <string name="status_disabled">Protección desactivada</string>
+
+    <string name="role_unavailable_toast">Tu sistema no ofrece el rol de filtrado</string>
+    <string name="setting_save_failed">No se pudo guardar el ajuste</string>
+    <string name="protection_configured">Protección configurada</string>
+    <string name="contacts_denied_safe">Sin contactos, las llamadas se permitirán por seguridad</string>
+    <string name="history_clear_failed">No se pudo borrar el historial</string>
+    <string name="history_cleared">Historial borrado</string>
+
+    <string name="clear_history_title">¿Borrar todo el historial?</string>
+    <string name="clear_history_message">Se eliminarán permanentemente todos los registros de llamadas bloqueadas. Esta acción no se puede deshacer.</string>
+    <string name="cancel">Cancelar</string>
+    <string name="clear_history_action">Borrar historial</string>
+    <string name="empty_history">Sin llamadas bloqueadas\nCuando se bloquee un número no guardado, aparecerá aquí.</string>
+
+    <string name="contacts_settings_title">Permiso de contactos bloqueado</string>
+    <string name="contacts_settings_message">Para distinguir contactos de números desconocidos, habilita Contactos en los ajustes de la aplicación. Sin ese permiso se permitirán todas las llamadas.</string>
+    <string name="open_settings">Abrir ajustes</string>
+
+    <string name="about_drawer_message">Versión %1$s\n\nNord Call Blocker es un filtro personal de llamadas que funciona completamente en el teléfono, sin cuentas ni conexión a Internet.\n\nDespués del primer desbloqueo, permite contactos guardados y bloquea únicamente números que confirma como desconocidos. Ante cualquier duda, permite la llamada.</string>
+
+    <string name="today">Hoy</string>
+    <string name="yesterday">Ayer</string>
+    <string name="date_pattern_current_year">EEEE, d \'de\' MMMM</string>
+    <string name="date_pattern_other_year">EEEE, d \'de\' MMMM \'de\' yyyy</string>
+    <plurals name="blocked_calls_count">
+        <item quantity="one">%d bloqueada</item>
+        <item quantity="other">%d bloqueadas</item>
+    </plurals>
+</resources>
